@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Почтовый сервис</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Стили для боковой панели */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: #3498db;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #ecf0f1;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-item a:hover, .nav-item a.active {
+            background-color: #34495e;
+            color: #3498db;
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .compose-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 20px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .compose-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .compose-btn i {
+            margin-right: 8px;
+        }
+        
+        /* Стили для основной области */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Верхняя панель с поиском */
+        .top-bar {
+            background-color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #f5f7fa;
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 400px;
+        }
+        
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 5px 10px;
+            width: 100%;
+            outline: none;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* Стили для списка писем */
+        .mail-list-container {
+            flex: 1;
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .mail-list-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mail-list {
+            list-style: none;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        
+        .mail-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f5f7fa;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .mail-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .mail-item.unread {
+            background-color: #f0f8ff;
+        }
+        
+        .mail-item.unread .mail-sender, 
+        .mail-item.unread .mail-subject {
+            font-weight: bold;
+        }
+        
+        .mail-checkbox {
+            margin-right: 15px;
+        }
+        
+        .mail-star {
+            margin-right: 15px;
+            color: #ddd;
+            cursor: pointer;
+        }
+        
+        .mail-star.active {
+            color: #f39c12;
+        }
+        
+        .mail-sender {
+            width: 200px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .mail-subject {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 15px;
+        }
+        
+        .mail-preview {
+            color: #777;
+            width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .mail-date {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        /* Стили для просмотра письма */
+        .mail-view {
+            display: none;
+            padding: 30px;
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .mail-view.active {
+            display: block;
+        }
+        
+        .mail-view-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .mail-view-subject {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .mail-view-info {
+            display: flex;
+            justify-content: space-between;
+            color: #777;
+        }
+        
+        .mail-view-sender {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .mail-view-body {
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .mail-view-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 1100px) {
+            .mail-preview {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 20px 0;
+            }
+            
+            .logo h1 span, .nav-item a span {
+                display: none;
+            }
+            
+            .logo h1 {
+                justify-content: center;
+            }
+            
+            .nav-item a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                font-size: 18px;
+            }
+            
+            .compose-btn span {
+                display: none;
+            }
+            
+            .compose-btn i {
+                margin-right: 0;
+            }
+            
+            .search-bar {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Боковая панель -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1><i class="fas fa-envelope"></i> <span>Почта</span></h1>
+            </div>
+            
+            <button class="compose-btn">
+                <i class="fas fa-pen"></i> <span>Написать</span>
+            </button>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="active">
+                        <i class="fas fa-inbox"></i> <span>Входящие</span>
+                        <span style="margin-left: auto;">12</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-star"></i> <span>Избранное</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-paper-plane"></i> <span>Отправленные</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-file-alt"></i> <span>Черновики</span>
+                        <span style="margin-left: auto;">3</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-trash-alt"></i> <span>Корзина</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Основная область -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <div class="top-bar">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Поиск в почте">
+                </div>
+                
+                <div class="user-info">
+                    <div class="avatar">ИИ</div>
+                    <div>
+                        <div style="font-weight: 600;">Иван Иванов</div>
+                        <div style="font-size: 14px; color: #777;">ivan@example.com</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Список писем -->
+            <div class="mail-list-container">
+                <div class="mail-list-header">
+                    <h2>Входящие</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Обновить
+                        </button>
+                    </div>
+                </div>
+                
+                <ul class="mail-list">
+                    <li class="mail-item unread" data-mail="1">
+                        <input type="checkbox" class="mail-checkbox">
+                        <i class="fas fa-star mail-star active"></i>
+                        <div class="mail-sender">Мария Петрова</div>
+                        <div class="mail-subject">Отчет за март 2023</div>
+                        <div class="mail-preview">Привет! Отправляю тебе отчет за март. Все данные уже сведены в таблицы...</div>
+                        <div class="mail-date">15 апр</div>
+                    </li>
+                    
+                    <li class="mail-item" data-mail="2">
+                        <input type="checkbox" class="mail-checkbox">
+                        <i class="fas fa-star mail-star"></i>
+                        <div class="mail-sender">Команда разработки</div>
+                        <div class="mail-subject">Совещание в пятницу</div>
+                        <div class="mail-preview">Напоминаем, что в эту пятницу в 11:00 состоится совещание по проекту...</div>
+                        <div class="mail-date">14 апр</div>
+                    </li>
+                    
+                    <li class="mail-item unread" data-mail="3">
+                        <input type="checkbox" class="mail-checkbox">
+                        <i class="fas fa-star mail-star"></i>
+                        <div class="mail-sender">Онлайн-магазин "Техно"</div>
+                        <div class="mail-subject">Ваш заказ отправлен</div>
+                        <div class="mail-preview">Ваш заказ №45678 от 12.04.2023 был отправлен. Трек-номер для отслеживания...</div>
+                        <div class="mail-date">13 апр</div>
+                    </li>
+                    
+                    <li class="mail-item" data-mail="4">
+                        <input type="checkbox" class="mail-checkbox">
+                        <i class="fas fa-star mail-star"></i>
+                        <div class="mail-sender">Алексей Смирнов</div>
+                        <div class="mail-subject">Встреча в кофейне</div>
+                        <div class="mail-preview">Привет! Как насчет встретиться в понедельник в нашей любимой кофейне?</div>
+                        <div class="mail-date">12 апр</div>
+                    </li>
+                    
+                    <li class="mail-item" data-mail="5">
+                        <input type="checkbox" class="mail-checkbox">
+                        <i class="fas fa-star mail-star active"></i>
+                        <div class="mail-sender">Социальная сеть "Профессионалы"</div>
+                        <div class="mail-subject">Новые предложения работы</div>
+                        <div class="mail-preview">Мы подобрали для вас новые вакансии, которые могут вас заинтересовать...</div>
+                        <div class="mail-date">10 апр</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Область просмотра письма -->
+            <div class="mail-view" id="mail-view">
+                <div class="mail-view-header">
+                    <h1 class="mail-view-subject">Отчет за март 2023</h1>
+                    <div class="mail-view-info">
+                        <div>
+                            От: <span class="mail-view-sender">Мария Петрова &lt;maria.petrova@company.com&gt;</span>
+                            <br>
+                            Кому: <span class="mail-view-sender">Иван Иванов &lt;ivan@example.com&gt;</span>
+                        </div>
+                        <div>15 апреля 2023, 10:30</div>
+                    </div>
+                </div>
+                
+                <div class="mail-view-body">
+                    <p>Привет, Иван!</p>
+                    
+                    <p>Отправляю тебе отчет за март 2023 года. Все данные уже сведены в таблицы и представлены в виде графиков для наглядности.</p>
+                    
+                    <p>Основные показатели:</p>
+                    <ul>
+                        <li>Выручка увеличилась на 15% по сравнению с февралем</li>
+                        <li>Количество новых клиентов выросло на 23%</li>
+                        <li>Самый популярный продукт — "Бизнес-аналитика PRO"</li>
+                    </ul>
+                    
+                    <p>Подробный отчет в приложении. Давай обсудим результаты на еженедельной встрече в понедельник.</p>
+                    
+                    <p>С уважением,<br>Мария</p>
+                </div>
+                
+                <div class="mail-view-actions">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-reply"></i> Ответить
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-forward"></i> Переслать
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-print"></i> Печать
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Переключение избранного (звездочки)
+        document.querySelectorAll('.mail-star').forEach(star => {
+            star.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+            });
+        });
+        
+        // Просмотр письма при клике
+        document.querySelectorAll('.mail-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Скрываем список писем на мобильных устройствах
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.mail-list-container').style.display = 'none';
+                }
+                
+                // Показываем область просмотра
+                document.getElementById('mail-view').classList.add('active');
+                
+                // Помечаем письмо как прочитанное
+                this.classList.remove('unread');
+            });
+        });
+        
+        // Кнопка "Написать"
+        document.querySelector('.compose-btn').addEventListener('click', function() {
+            alert('Открывается форма создания нового письма');
+        });
+        
+        // Кнопка "Обновить"
+        document.querySelector('.btn-secondary').addEventListener('click', function() {
+            alert('Почта обновляется...');
+        });
+        
+        // Поиск по письмам
+        document.querySelector('.search-bar input').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.toLowerCase();
+                const mailItems = document.querySelectorAll('.mail-item');
+                
+                mailItems.forEach(item => {
+                    const sender = item.querySelector('.mail-sender').textContent.toLowerCase();
+                    const subject = item.querySelector('.mail-subject').textContent.toLowerCase();
+                    const preview = item.querySelector('.mail-preview').textContent.toLowerCase();
+                    
+                    if (sender.includes(query) || subject.includes(query) || preview.includes(query)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+        
+        // Навигация по меню
+        document.querySelectorAll('.nav-item a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Удаляем активный класс у всех пунктов меню
+                document.querySelectorAll('.nav-item a').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Добавляем активный класс к выбранному пункту
+                this.classList.add('active');
+                
+                // Обновляем заголовок списка писем
+                const menuText = this.querySelector('span').textContent;
+                document.querySelector('.mail-list-header h2').textContent = menuText;
+                
+                // Сбрасываем отображение списка писем на мобильных
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.mail-list-container').style.display = 'block';
+                    document.getElementById('mail-view').classList.remove('active');
+                }
+            });
+        });
+        
+        // Имитация получения нового письма (демонстрация)
+        setTimeout(() => {
+            const mailList = document.querySelector('.mail-list');
+            const newMail = document.createElement('li');
+            newMail.className = 'mail-item unread';
+            newMail.innerHTML = `
+                <input type="checkbox" class="mail-checkbox">
+                <i class="fas fa-star mail-star"></i>
+                <div class="mail-sender">Новый отправитель</div>
+                <div class="mail-subject">Новое письмо в вашем ящике</div>
+                <div class="mail-preview">Это демонстрационное письмо было добавлено для показа функциональности...</div>
+                <div class="mail-date">Только что</div>
+            `;
+            
+            // Добавляем новое письмо в начало списка
+            mailList.insertBefore(newMail, mailList.firstChild);
+            
+            // Обновляем счетчик во входящих
+            const inboxCounter = document.querySelector('.nav-item a.active span:last-child');
+            if (inboxCounter) {
+                const currentCount = parseInt(inboxCounter.textContent) || 0;
+                inboxCounter.textContent = currentCount + 1;
+            }
+            
+            // Добавляем обработчик клика для нового письма
+            newMail.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.mail-list-container').style.display = 'none';
+                }
+                document.getElementById('mail-view').classList.add('active');
+                this.classList.remove('unread');
+            });
+            
+            // Добавляем обработчик для звездочки
+            newMail.querySelector('.mail-star').addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('active');
+            });
+            
+        }, 5000); // Через 5 секунд
+    </script>
+</body>
+</html>
